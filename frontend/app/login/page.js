@@ -4,8 +4,14 @@ import { useForm } from "react-hook-form"
 import Button from "@/components/Button"
 import Link from "next/link"
 import api from "@/lib/api"
+import useUserStorage from "@/store/useUserStorage"
+import { useRouter } from "next/navigation"
 
 export default function page() {
+
+    const { setUser } = useUserStorage()
+    const router = useRouter()
+ 
 
     const {
          register,
@@ -22,8 +28,9 @@ export default function page() {
                     password: data.password
                 })
             })
-
-            console.log(res)
+              
+            setUser(res.user)
+            router.push("/dashboard")
         } catch (error) {
             console.log(error)
         }
