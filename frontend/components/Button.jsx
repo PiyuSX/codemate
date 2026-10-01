@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import React from 'react'
 
-const Button = ({style, link, onclick, text, primary, secondary }) => {
+const Button = ({style, link, onclick, text, primary, secondary, type="button" }) => {
 
     let buttonStyle = `
     text-xl font-medium px-6 py-3 rounded-xl
@@ -24,7 +24,7 @@ const Button = ({style, link, onclick, text, primary, secondary }) => {
 
   if (onclick) {
     return (
-        <button onClick={onclick} className={buttonStyle}>
+        <button type={type} onClick={onclick} className={buttonStyle}>
             {text}
         </button>
     )
