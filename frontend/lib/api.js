@@ -1,8 +1,9 @@
 
-const API_URL = "http://localhost:3000/api"
+const API_URL = "http://localhost:5000/api"
 
 const api = async (url, options = {}) => {
      const res = await fetch(`${API_URL}${url}`, {...options,
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
             ...options.headers

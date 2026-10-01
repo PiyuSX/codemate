@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form"
 import Button from "@/components/Button"
 import Link from "next/link"
+import api from "@/lib/api"
 
 export default function page() {
 
@@ -12,8 +13,21 @@ export default function page() {
         formState: { errors }
     } = useForm()
 
-   const onSubmit = (data) => {
-      console.log(data)
+   const onSubmit = async (data) => {
+    try {
+        const res = await api("/auth/signup", {
+            method: "POST",
+            body: JSON.stringify({
+                username: data.username,
+                password: data.password,
+                email: data.email
+            })
+        })
+
+        console.log(res)
+    } catch (error) {
+        console.log(error)
+    }
    }
     return (
         <div className=" min-h-screen w-full grid grid-cols-2">
