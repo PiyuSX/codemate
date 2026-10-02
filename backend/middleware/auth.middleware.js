@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 
-const authMiddleware = (req, res, next) => {
+const userAuth = (req, res, next) => {
     try {
          const token = req.cookies.token
          if(!token) {
@@ -19,3 +19,5 @@ const authMiddleware = (req, res, next) => {
         return res.status(401).json({ message: "Sorry Mate you are not Authorized to do this"})
      }
 }
+
+export { userAuth}

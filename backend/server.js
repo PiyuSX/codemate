@@ -3,6 +3,7 @@ import cors from "cors"
 import authRoutes from "./routes/auth.route.js"
 import connectDB from "./config/db.js"
 import dotenv from "dotenv"
+import userRoutes from "./routes/user.route.js"
 
 dotenv.config()
 
@@ -19,6 +20,7 @@ app.use(express.json())
 const PORT = process.env.PORT || 5000
 
 app.use("/api/auth", authRoutes)
+app.use("/api/user", userRoutes)
 
 app.get("/", (req, res) => {
     res.send("Hello from the backend!")
