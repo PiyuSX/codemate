@@ -1,13 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import Button from "@/components/Button"
 import { useForm } from "react-hook-form"
 import useUserStorage from "@/store/useUserStorage"
 import { Edit } from "lucide-react"
+import api from "@/lib/api"
 
 export default function Profile() {
 
     const { user, setUser } = useUserStorage()
+    
+    const [isPasswordPop , setIsPasswordPop] = useState(false)
 
     const {
         register,
@@ -22,7 +26,26 @@ export default function Profile() {
     })
 
     const onSubmit = async (data) => {
-        console.log(data)
+        try {
+            const res = await api("/user/update", {
+                method: "PUT",
+                body: JSON.stringify({
+                    username: data.username,
+                    email: data.email,
+                    imgURL: data.imgURL,
+                    password: data.password
+                })
+            })
+
+            
+                setUser(res.user)
+            
+            setIsPasswordPop(false)
+            console.log(res)
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 
 
@@ -39,7 +62,19 @@ export default function Profile() {
               {errors.username && <span className="text-red-500">{errors.username.message}</span>}
              <input {...register("email", { required: "Email is required", pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: "Invalid email address" } })} type="email" placeholder="Email" className="w-full px-5 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500" />
              {errors.email && <span className="text-red-500">{errors.email.message}</span>}
-             <Button style="!w-full" type="submit" text="Update" primary onclick={() => {}} />
+             <Button style="!w-full" text="Update" type="button" primary onclick={() => setIsPasswordPop(!isPasswordPop)} />
+                {isPasswordPop && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 ">
+                        <div className="flex flex-col gap-4 w-1/5 bg-gray-200/70 p-8 rounded-lg " >
+                        <input {...register("password", { required: "Password is required" })} type="password" placeholder="Enter your password to update your profile." className="w-full px-5 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500" />
+                        {errors.password && <span className="text-red-500">{errors.password.message}</span>}
+    
+                        <Button style="!w-full" text="Confirm" type="submit" primary onclick={() => {}}  />
+                        <Button style="!w-full !bg-gray-700 hover:!bg-gray-600" text="Cancel" primary onclick={() => setIsPasswordPop(false)} />
+
+                        </div>
+                    </div>
+                )}
             </form>
         </div>
     )
