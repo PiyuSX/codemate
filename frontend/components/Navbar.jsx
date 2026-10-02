@@ -32,16 +32,16 @@ const Navbar = () => {
       <div className="text-right mr-25">
         {user ? (
           <div className="flex justify-end items-center ">
-            <div className="flex flex-col bg-gray-200 text-slate-950 rounded px-6 py-3 rounded-b-xl text-xl gap-2">
+            <div className="flex flex-col bg-gray-200 text-slate-950 rounded px-4 py-1 rounded-b-xl text-xl gap-2">
               <div className="flex items-center gap-2 ">
                 {user.imgURL ? (
                   <img
                     src={user.imgURL}
                     alt="User"
-                    className="rounded-full size-6"
+                    className="rounded-full size-12"
                   />
                 ) : (
-                  <p className="flex size-8 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-gray-200 ring-1 ring-white/10">
+                  <p className="flex size-12 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-gray-200 ring-1 ring-white/10">
                     {user.username.charAt(0).toUpperCase()}
                   </p>
                 )}

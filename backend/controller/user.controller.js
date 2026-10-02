@@ -2,7 +2,7 @@ import User  from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 
 const updateUser = async (req, res) => {
-    const { username, email, imgUrl, password } = req.body
+    const { username, email, imgURL, password } = req.body
     const userId = req.userId
     
     try {
@@ -30,7 +30,7 @@ const updateUser = async (req, res) => {
 
     user.username = username || user.username
     user.email = email || user.email
-    user.imgUrl = imgUrl || user.imgUrl
+    user.imgURL = imgURL || user.imgURL
 
     const updatedUser = await user.save()
 
@@ -40,7 +40,7 @@ const updateUser = async (req, res) => {
             id: updatedUser._id,
             username: updatedUser.username,
             email: updatedUser.email,
-            imgUrl: updatedUser.imgUrl
+            imgURL: updatedUser.imgURL
         }
     })
     
