@@ -3,10 +3,11 @@
 import Button from "@/components/Button";
 import { usePathname } from "next/navigation";
 import useUserStorage from "@/store/useUserStorage";
-import { UserRound, ChevronDown, Settings } from "lucide-react";
+import { ChevronDown, Settings } from "lucide-react";
 import { useState } from "react";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -57,7 +58,9 @@ const Navbar = () => {
                     onClick={() => setIsDropdownOpen(false)}
                   >
                     <div className="flex gap-2 items-center text-lg hover:text-indigo-500 cursor-pointer">
+                      <Link href="/settings" className="flex gap-2 items-center">
                       <Settings /> Settings
+                      </Link>
                     </div>
 
                     <Button
