@@ -1,6 +1,11 @@
+"use client"
+
 import Image from "next/image";
+import useUserStorage from "@/store/useUserStorage";
+import Button from "@/components/Button";
 
 export default function Page() {
+  const { user } = useUserStorage();
 
   return (
     <div className="relative min-h-screen w-full bg-slate-950">
@@ -8,7 +13,19 @@ export default function Page() {
       <div className="z-10 relative flex flex-col items-center mt-64">
           <h1 className="text-[#F9FAFB] font-medium text-6xl">CodeMate</h1>
           <p className="text-[#E5E7EB] text-2xl">A place where you find your new mates</p>
-          <p className="text-[#E5E7EB] text-lg">Login to get Started</p>
+          {user ? (
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-[#E5E7EB] text-xl">Welcome back, {user.username}!</p>
+              <Button text="Go to Dashboard" link="/dashboard" primary  />
+            </div>
+
+          ): (
+      <div className="flex flex-col items-center gap-4">
+        <p className="text-[#E5E7EB] text-xl">Login to get Started</p>
+        <Button text="Login" link="/login" primary />
+
+      </div>
+          )}
 
           <Image src="/placeholder.png" alt="heropicture" className="mt-20 rounded-2xl" width="1200" height="300" />
       </div>
