@@ -47,7 +47,8 @@ const signupUser = async (req, res) => {
             user: {
                 id: savedUser._id,
                 username: savedUser.username,
-                email: savedUser.email
+                email: savedUser.email,
+                imgURL: savedUser.imgURL
             }
         })
 
@@ -91,7 +92,8 @@ const loginUser = async (req, res) => {
         user: {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            imgURL: user.imgURL
         }
       })
 
@@ -104,4 +106,14 @@ const loginUser = async (req, res) => {
 
 }
 
-export { signupUser, loginUser }
+const logoutUser = (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict"
+    })
+
+    return res.status(200).json({message: "Logout Successful"})
+}
+
+export { signupUser, loginUser, logoutUser }
