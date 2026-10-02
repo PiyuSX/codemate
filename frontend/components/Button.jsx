@@ -6,7 +6,7 @@ import React from 'react'
 const Button = ({style, link, onclick, text, primary, secondary, type="button" }) => {
 
     let buttonStyle = `
-    text-xl font-medium px-6 py-3 rounded-xl
+    text-xl font-medium px-6 py-3 rounded-xl cursor-pointer
     transition-all duration-200
     ${primary ? 'bg-indigo-500 text-white hover:bg-indigo-600' : ''}
     ${secondary ? 'bg-gray-200 text-slate-950 hover:bg-white' : ''}
