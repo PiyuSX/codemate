@@ -1,6 +1,8 @@
+import User  from "../models/user.model.js"
+import bcrypt from "bcryptjs"
 
 const updateUser = async (req, res) => {
-    const { username, email, imgUrl } = req.body
+    const { username, email, imgUrl, password } = req.body
     const userId = req.userId
     
     try {
@@ -9,16 +11,23 @@ const updateUser = async (req, res) => {
         return res.status(404).json({ message: "User not found"})
      }
 
-    const usedUsername = await User.findOne({ username })
+    const usedUsername = await User.findOne({ username, _id: { $ne: userId } })
     if(usedUsername) {
         return res.status(400).json({ message: "Username already in use"})
     }
 
-    const usedEmail = await User.findOne({ email }) 
+    const usedEmail = await User.findOne({ email,  _id: { $ne: userId } }) 
     if(usedEmail) {
         return res.status(400).json({ message: "Account with this email alrady exists "})
     }
     
+    const isPasswordCorrect = await bcrypt.compare(password, user.password)
+
+    if(!isPasswordCorrect) {
+        return res.status(400).json({ message: "Incorrect password"})
+    }
+
+
     user.username = username || user.username
     user.email = email || user.email
     user.imgUrl = imgUrl || user.imgUrl
@@ -42,3 +51,6 @@ const updateUser = async (req, res) => {
         return res.status (500).json({ message: "Internal server error"})
     }
 }
+
+
+export { updateUser } 
