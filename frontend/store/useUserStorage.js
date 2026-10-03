@@ -8,6 +8,14 @@ const useUserStorage = create(
 
             setUser: (user) => set({ user }),
 
+            setUserLanguages: (languages) =>
+                set((state) => ({
+                    user: {
+                        ...state.user,
+                        languages,
+                    },
+                })),
+
             clearUser: () => set({ user: null }),
         }),
         {

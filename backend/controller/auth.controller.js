@@ -49,7 +49,8 @@ const signupUser = async (req, res) => {
                 username: savedUser.username,
                 email: savedUser.email,
                 imgURL: savedUser.imgURL,
-                imgPublicId: savedUser.imgPublicId
+                imgPublicId: savedUser.imgPublicId,
+                languages: savedUser.languages
             }
         })
 
@@ -95,7 +96,8 @@ const loginUser = async (req, res) => {
             username: user.username,
             email: user.email,
             imgURL: user.imgURL,
-            imgPublicId: user.imgPublicId
+            imgPublicId: user.imgPublicId,
+            languages: user.languages
         }
       })
 

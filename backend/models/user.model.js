@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
     imgPublicId: {
         type: String,
         default: null
+    },
+    languages: {
+        type: [String],
+        enum: ["HTML", "CSS", "JavaScript", "Python"],
+        default: []
     }
 }, { timestamps: true})
 
