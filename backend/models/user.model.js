@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
     imgURL: {
         type: String,
         default: null
+    },
+    imgPublicId: {
+        type: String,
+        default: null
     }
 }, { timestamps: true})
 

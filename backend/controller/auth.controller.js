@@ -48,7 +48,8 @@ const signupUser = async (req, res) => {
                 id: savedUser._id,
                 username: savedUser.username,
                 email: savedUser.email,
-                imgURL: savedUser.imgURL
+                imgURL: savedUser.imgURL,
+                imgPublicId: savedUser.imgPublicId
             }
         })
 
@@ -93,7 +94,8 @@ const loginUser = async (req, res) => {
             id: user._id,
             username: user.username,
             email: user.email,
-            imgURL: user.imgURL
+            imgURL: user.imgURL,
+            imgPublicId: user.imgPublicId
         }
       })
 
@@ -117,5 +119,20 @@ const logoutUser = (req, res) => {
 }
 
 
+const verifyPassword = async (req, res) => {
+    const { password } = req.body
+    const userId = req.userId
 
-export { signupUser, loginUser, logoutUser }
+    try {
+        const user = await User.findById(userId)
+        const isPasswordCorrect = await bcrypt.compare(password, user.password)
+        
+        return res.status(200).json({ isPasswordCorrect })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal server error"})
+    }
+}
+
+
+export { signupUser, loginUser, logoutUser,  verifyPassword }

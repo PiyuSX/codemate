@@ -2,7 +2,7 @@ import User  from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 
 const updateUser = async (req, res) => {
-    const { username, email, imgURL, password } = req.body
+    const { username, email, imgURL, password, imgPublicId } = req.body
     const userId = req.userId
     
     try {
@@ -31,8 +31,10 @@ const updateUser = async (req, res) => {
     user.username = username || user.username
     user.email = email || user.email
     user.imgURL = imgURL || user.imgURL
+    user.imgPublicId = imgPublicId || user.imgPublicId
 
     const updatedUser = await user.save()
+    
 
     return res.status(200).json({
         message: "User updated successfully",
@@ -40,7 +42,8 @@ const updateUser = async (req, res) => {
             id: updatedUser._id,
             username: updatedUser.username,
             email: updatedUser.email,
-            imgURL: updatedUser.imgURL
+            imgURL: updatedUser.imgURL,
+            imgPublicId: updatedUser.imgPublicId
         }
     })
     
