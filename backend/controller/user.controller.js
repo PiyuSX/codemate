@@ -43,7 +43,8 @@ const updateUser = async (req, res) => {
             username: updatedUser.username,
             email: updatedUser.email,
             imgURL: updatedUser.imgURL,
-            imgPublicId: updatedUser.imgPublicId
+            imgPublicId: updatedUser.imgPublicId,
+            languages: updatedUser.languages
         }
     })
     
