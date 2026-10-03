@@ -6,11 +6,14 @@ import Link from "next/link"
 import api from "@/lib/api"
 import useUserStorage from "@/store/useUserStorage"
 import { useRouter } from "next/navigation"
+import { showSlide } from "@/store/useSlideStorage"
+
 
 export default function page() {
 
     const { setUser } = useUserStorage()
     const router = useRouter()
+
  
 
     const {
@@ -30,9 +33,10 @@ export default function page() {
             })
               
             setUser(res.user)
+            showSlide(res.message)
             router.push("/dashboard")
         } catch (error) {
-            console.log(error)
+              showSlide(error.message)
         }
     }
 
