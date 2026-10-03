@@ -57,4 +57,23 @@ const updateUser = async (req, res) => {
 }
 
 
-export { updateUser } 
+const deleteUser = async (req, res) => {
+    const userId = req.userId
+
+    try {
+        await User.findByIdAndDelete(userId)
+
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: false,
+            sameSite: "strict"
+        })
+        return res.status(200).json({success: true, message: "User deleted successfully"})
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal server error"})
+    }
+}
+
+export { updateUser, deleteUser } 

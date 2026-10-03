@@ -6,6 +6,8 @@ import Button from "@/components/Button";
 import { useState } from "react";
 import api from "@/lib/api";
 import NormalLanguageCard from "@/components/NormalLanguageCard";
+import { showSlide } from "@/store/useSlideStorage"
+
 
 
 export default function Profile() {
@@ -25,7 +27,7 @@ export default function Profile() {
       const res = await api("/languages");
       setLanguages(res.languages || []);
     } catch (error) {
-      console.log(error);
+      showSlide(error.message)
     }
   };
 
@@ -45,9 +47,9 @@ export default function Profile() {
             setIsLanguagePop(false)
         }
 
-        console.log(res)
+        showSlide(res.message)
     } catch (error) {
-        console.log(error);
+        showSlide(error.message)
     }
   }
 

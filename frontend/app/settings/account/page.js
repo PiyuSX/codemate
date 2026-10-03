@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import useUserStorage from "@/store/useUserStorage";
 import { Edit } from "lucide-react";
 import api from "@/lib/api";
+import { showSlide } from "@/store/useSlideStorage"
+
 
 export default function Profile() {
   const { user, setUser } = useUserStorage();
@@ -78,10 +80,10 @@ export default function Profile() {
         setUser(res.user);
 
         setIsPasswordPop(false);
-        console.log(res);
+        showSlide(res.message)
       }
     } catch (error) {
-      console.log(error);
+      showSlide(error.message)
     }
   };
 
