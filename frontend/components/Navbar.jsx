@@ -8,6 +8,8 @@ import { useState } from "react";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { showSlide } from "@/store/useSlideStorage"
+
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -17,6 +19,7 @@ const Navbar = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
+    showSlide("Logged out successfully !");
     const res = await api("/auth/logout", {
       method: "POST",
     });
@@ -24,7 +27,6 @@ const Navbar = () => {
     setUser(null);
     router.push("/");
 
-    console.log(res.message);
   };
 
   return (

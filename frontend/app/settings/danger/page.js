@@ -36,10 +36,10 @@ export default function Danger() {
                 })
                 if(deleteRes.success) {
                     setUser(null)
+                    showSlide(deleteRes.message)
                     router.push("/")
                 }
 
-                showSlide(deleteRes.message)
 
             }
             
