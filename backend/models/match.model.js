@@ -10,11 +10,6 @@ const matchSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    status: {
-        type: String,
-        enum: ["none","active", "completed"],
-        default: "active"
-    },
     roomId: {
         type: String,
         default: null

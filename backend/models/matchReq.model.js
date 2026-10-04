@@ -14,8 +14,8 @@ const matchReqSchema = new mongoosse.Schema({
 
     status: {
         type: String,
-        enum: ["none", "searching", "matched"],
-        default: "none"
+        enum: ["searching", "matched"],
+        default: "searching"
     }
 }, { timestamps: true })
 

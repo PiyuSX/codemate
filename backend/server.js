@@ -6,6 +6,7 @@ import dotenv from "dotenv"
 import userRoutes from "./routes/user.route.js"
 import cookieParser from "cookie-parser"
 import languageRoutes from "./routes/language.route.js"
+import matchRoutes from "./routes/match.route.js"
 
 dotenv.config()
 
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 5000
 app.use("/api/auth", authRoutes)
 app.use("/api/user", userRoutes)
 app.use("/api/languages", languageRoutes)
+app.use("/api/match", matchRoutes)
 
 app.get("/", (req, res) => {
     res.send("Hello from the backend!")
