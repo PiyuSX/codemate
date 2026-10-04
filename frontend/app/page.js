@@ -3,15 +3,15 @@
 import Image from "next/image";
 import useUserStorage from "@/store/useUserStorage";
 import Button from "@/components/Button";
-import { showSlide } from "@/store/useSlideStorage"
+// import { showSlide } from "@/store/useSlideStorage"
 import { useEffect } from "react";
 
 export default function Page() {
   const { user } = useUserStorage();
 
-  useEffect(() => {
-      showSlide("Welcome Mate !")
-  }, [])
+  // useEffect(() => {
+  //     showSlide("Welcome Mate !")
+  // }, [])
 
   return (
     <div className="relative min-h-screen w-full bg-slate-950">
