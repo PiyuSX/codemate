@@ -58,10 +58,13 @@ import User from "../models/user.model"
            const newMatch = new Match({
                  users: [userId, matchedUser.userId],
                  language: oneRandomCommonLanguage,
-                 status: "active"
            })
 
               await newMatch.save()
+
+              //Updating the status of both users to matched
+              await MatchReq.updateOne({userId: userId}, {status: "matched"})
+              await MatchReq.updateOne({userId: matchedUser.userId}, {status: "matched"})
         }
 
     } catch (error) {
@@ -77,8 +80,15 @@ import User from "../models/user.model"
     const userId = req.userId
 
     try {
-        //Deleting the MatchReq of the user after the match is cleard 
-        await 
+        //Deleting the Match after the session end 
+        const matchReq = await MatchReq.findOne({userId})
+        if(matchReq.status == "matched") {
+            const match = await Match.findOne({users: userId})
+           const userIds = match.users
+
+           await MatchReq.updateMany({userId: {$in: userIds}}, {status: "searching"})
+           await Match.deleteOne({users: userId})
+        }
 
 
     } catch (error) {
@@ -86,3 +96,22 @@ import User from "../models/user.model"
         return res.status(500).json({ message: "Internal Server Error" })
     }
  }
+
+
+ const matchReqClear = async (req, res) => {
+    const userId = req.userId
+    try {
+        await MatchReq.deleteOne({userId})
+
+        const currentMatch = await Match.findOne({users: userId})
+        if(currentMatch) {
+            await Match.deleteOne({users: userId})
+        }
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+ }
+
+
+ export { findMatch, matchClear, matchReqClear }
