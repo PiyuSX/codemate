@@ -143,6 +143,9 @@ import User from "../models/user.model.js"
 
         const currentMatch = await Match.findOne({users: userId})
         if(currentMatch) {
+            const anotherUserId = currentMatch.users.find(id => id.toString() !== userId.toString())
+            await MatchReq.updateOne({userId: anotherUserId}, {status: "searching"})
+            
             await Match.deleteOne({users: userId})
         }
 
