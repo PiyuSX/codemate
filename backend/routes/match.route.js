@@ -1,12 +1,14 @@
 import express from "express"
+import { findMatch, matchClear, matchReqClear } from "../controller/match.controller.js"
+import { userAuth } from "../middleware/auth.middleware.js"
+
 
 const router = express.Router()
 
-import { findMatch, matchClear, matchReqClear } from "../controller/match.controller.js"
 
-router.post("/find", findMatch)
-router.post("/session-end", matchClear)
-router.post("/end-all", matchReqClear)
+router.post("/find",userAuth, findMatch)
+router.post("/session-end",userAuth, matchClear)
+router.post("/end-all", userAuth, matchReqClear)
 
 
 
