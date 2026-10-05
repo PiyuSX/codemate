@@ -1,6 +1,6 @@
-import MatchReq from "../models/matchReq.model" 
-import Match from "../models/match.model"
-import User from "../models/user.model"
+import MatchReq from "../models/matchReq.model.js" 
+import Match from "../models/match.model.js"
+import User from "../models/user.model.js"
 
 
  const findMatch = async (req, res) => {
@@ -8,6 +8,10 @@ import User from "../models/user.model"
     const { languages } = req.body
 
     try {
+        //Deleting this later if found Other solution
+        const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+    
+
         //Writing comments cuz its too confusing for me too !
         const user = await User.findById(userId)
 
@@ -26,17 +30,41 @@ import User from "../models/user.model"
             return res.status(400).json({ message: "You are already in a match" })
         }
 
-        //Creating a MatchReq for user 
-        const newMatchReq = new MatchReq({
-            userId: userId,
-            languages: verifiedLanguagesForMatch,
-            status: "searching"
-        })
+        //Checking if User had match and they ended session so their old MatchReq is still in db so using it again
+        const existingMatchReq = await MatchReq.findOne({userId})
 
-        await newMatchReq.save()
+        if(existingMatchReq) {
+            existingMatchReq.languages = verifiedLanguagesForMatch
+            existingMatchReq.status = "searching"
+            await existingMatchReq.save()
+        } else {
+            //Creating a MatchReq for user 
+            const newMatchReq = new MatchReq({
+                userId: userId,
+                languages: verifiedLanguagesForMatch,
+                status: "searching"
+            })
+            await newMatchReq.save()
+        }
 
+
+
+        
+        
+        //Deleting this later if found Other solution
+        const startTime = Date.now()
+
+        while (Date.now() - startTime < 3 * 60 * 1000) {
+            //Checking after every 3 seconds if there is a mate for the current user other wise the api will not respond for 3 min 
+            const currentMatchReq= await MatchReq.findOne({userId})
+            
+            //returning if the user found the mate
+            if(currentMatchReq.status == "matched") {
+                return res.status(200).json({ message: "Your mate has been found"})
+            }
+            
+            
         //Finding a mate for the current user
-
 
         //But i have not figured out how to wait if there is no current mate for match i need to read docs and Web for soln later 
         const matchedUser = await MatchReq.findOne({
@@ -65,7 +93,15 @@ import User from "../models/user.model"
               //Updating the status of both users to matched
               await MatchReq.updateOne({userId: userId}, {status: "matched"})
               await MatchReq.updateOne({userId: matchedUser.userId}, {status: "matched"})
+              return res.status(200).json({ message: "Your mate has been found"})
         }
+
+             //Delteting this later when i find other solution 
+             await wait(3000)
+    }
+
+
+        return res.status(200).json({ message: "No mate found for now | Please wait"})
 
     } catch (error) {
         console.log(error)
@@ -90,6 +126,8 @@ import User from "../models/user.model"
            await Match.deleteOne({users: userId})
         }
 
+        return res.status(200).json({ message: "Call ended | Finding new mate"})
+
 
     } catch (error) {
         console.log(error)
@@ -107,6 +145,8 @@ import User from "../models/user.model"
         if(currentMatch) {
             await Match.deleteOne({users: userId})
         }
+
+        return res.status(200).json({message: "Searching stopped"})
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" })

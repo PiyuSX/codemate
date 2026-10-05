@@ -19,11 +19,11 @@ const Navbar = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    showSlide("Logged out successfully !");
     const res = await api("/auth/logout", {
       method: "POST",
     });
-
+    
+    showSlide(res.message);
     setUser(null);
     router.push("/");
 

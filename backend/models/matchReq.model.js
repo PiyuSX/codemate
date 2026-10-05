@@ -1,8 +1,8 @@
-import mongoosse from "mongoose"
+import mongoose from "mongoose"
 
-const matchReqSchema = new mongoosse.Schema({
+const matchReqSchema = new mongoose.Schema({
     userId: {
-        type: mongoosse.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
