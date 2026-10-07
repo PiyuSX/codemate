@@ -9,12 +9,8 @@ const matchSchema = new mongoose.Schema({
     language: {
         type: String,
         required: true
-    },
-    roomId: {
-        type: String,
-        default: null
     }
-}, {timeStamps: true})
+}, {timestamps: true})
 
 const Match = mongoose.model("Match", matchSchema)
 

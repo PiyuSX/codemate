@@ -4,16 +4,57 @@ import useUserStorage from "@/store/useUserStorage";
 import Link from "next/link";
 import { useState } from "react";
 import Button from "@/components/Button";
+import { useForm }  from "react-hook-form"
+import { showSlide } from "@/store/useSlideStorage";
+import { useRouter } from "next/navigation"
+import useMatchStorage from "@/store/useMatchStorage";
+import api from "@/lib/api";
 
 export default function page() {
-  // const { user } = useUserStorage()
 
-  const user = {
-    languages: ["English", "Spanish", "French", "German", "Italian"],
-  };
+  const router = useRouter()
+
+  const { setLanguages } = useMatchStorage()
+
+  const { register, handleSubmit } = useForm({
+    defaultValues: {
+      languageOption: "all",
+    }
+  });
+  const { user } = useUserStorage()
+
+ 
 
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [showSpecificLanguages, setShowSpecificLanguages] = useState(false);
+
+
+  const onSubmit = async (data) => {
+    const languages = data.languageOption === "all" ? user.languages : selectedLanguages;
+
+    if(languages.length === 0) {
+      showSlide("Please select at least one language")
+      return;
+    }
+      setLanguages(languages)
+      router.push("/call")
+      
+  }
+
+  const handleReset = async () => {
+    try {
+      const res = await api("/match/reset", {
+        method: "DELETE"
+        
+      })
+
+      showSlide(res.message)
+      
+    } catch (error) {
+      showSlide("Mate Reset Failed | Please try again later, or contact support")
+    }
+  }
+
 
   return (
     <div className="flex flex-col items-center py-2 mt-72">
@@ -38,11 +79,11 @@ export default function page() {
           </p>
         </>
       ) : (
-        <form className="w-96">
+        <form className="w-96" onSubmit={handleSubmit(onSubmit)}>
           <label
             className="flex items-center gap-3 border border-slate-800 rounded-lg p-4 cursor-pointer hover:bg-slate-900"
           >
-            <input  className="cursor-pointer " type="radio" name="language" />
+            <input {...register("languageOption")} className="cursor-pointer accent-indigo-500" type="radio"  value="all" />
 
             <div>
               <p className="font-medium">All my Languages</p>
@@ -59,6 +100,10 @@ export default function page() {
             </div>
           </label>
 
+          <Link href="/settings/profile" className="text-indigo-500 hover:text-indigo-600">
+            Add More Languages to Your Profile
+          </Link>
+
           <p className="text-center my-6 text-slate-500">OR</p>
 
             <label
@@ -66,7 +111,7 @@ export default function page() {
             
           >
             
-            <input className="cursor-pointer " type="radio" name="language" onClick={() => setShowSpecificLanguages(!showSpecificLanguages)} />
+            <input {...register("languageOption")} className="cursor-pointer accent-indigo-500" type="radio" value="specific" onClick={() => setShowSpecificLanguages(!showSpecificLanguages)} />
             Select Specific Languages
             </label>
 
@@ -84,6 +129,7 @@ export default function page() {
               >
                 <input 
                   type="checkbox"
+                  className="accent-indigo-500"
                   checked={selectedLanguages.includes(language)}
                   onChange={() => {
                     setSelectedLanguages((prev) =>
@@ -107,12 +153,17 @@ export default function page() {
             <Button
               type="submit"
               text="Continue to Chat"
-              link="/settings/profile"
+              onclick={() => {}}
               primary
             />
           </div>
         </form>
+        
       )}
+      <div className="mt-36 flex flex-col items-start gap-2">
+      <p className="text-red-600">Use only in case of Repeated Issues in the Matching Process</p>
+      <Button style="!w-60 ml-5" text="Reset DB" onclick={handleReset} primary />
+      </div>
     </div>
   );
 }
