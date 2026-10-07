@@ -8,6 +8,8 @@ import User from "../models/user.model.js"
     const { languages } = req.body
 
     try {
+
+        let mateDetails = null;
         //Deleting this later if found Other solution
         const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
     
@@ -60,7 +62,19 @@ import User from "../models/user.model.js"
             
             //returning if the user found the mate
             if(currentMatchReq.status == "matched") {
-                return res.status(200).json({ message: "Your mate has been found"})
+                const currentMatch = await Match.findOne({users: userId})
+
+                const anotherUserId = currentMatch.users.find(
+                    id => id.toString() !== userId.toString()
+                )
+
+                const anotherUser = await User.findById(anotherUserId)
+
+                mateDetails = {
+                    username: anotherUser.username,
+                    imgURL: anotherUser.imgURL
+                }
+                return res.status(200).json({ message: "Your mate has been found", mateDetails, matchId: currentMatch._id})
             }
             
             
@@ -72,6 +86,17 @@ import User from "../models/user.model.js"
             languages: { $in: verifiedLanguagesForMatch },
             status: "searching"
         })
+
+        if(matchedUser) {
+            //Getting Details of the matched User
+            const matchUserDetails = await User.findById(matchedUser.userId)
+
+            mateDetails = {
+                username: matchUserDetails.username,
+                imgURL: matchUserDetails.imgURL
+            }
+        }
+        
 
         if(matchedUser) {
             //Intersection of both users languages
@@ -93,7 +118,7 @@ import User from "../models/user.model.js"
               //Updating the status of both users to matched
               await MatchReq.updateOne({userId: userId}, {status: "matched"})
               await MatchReq.updateOne({userId: matchedUser.userId}, {status: "matched"})
-              return res.status(200).json({ message: "Your mate has been found"})
+              return res.status(200).json({ message: "Your mate has been found", mateDetails, matchId: newMatch._id})
         }
 
              //Delteting this later when i find other solution 
@@ -139,14 +164,14 @@ import User from "../models/user.model.js"
  const matchReqClear = async (req, res) => {
     const userId = req.userId
     try {
-        await MatchReq.deleteOne({userId})
+        await MatchReq.deleteMany({userId})
 
         const currentMatch = await Match.findOne({users: userId})
         if(currentMatch) {
             const anotherUserId = currentMatch.users.find(id => id.toString() !== userId.toString())
             await MatchReq.updateOne({userId: anotherUserId}, {status: "searching"})
             
-            await Match.deleteOne({users: userId})
+            await Match.deleteMany({users: userId})
         }
 
         return res.status(200).json({message: "Searching stopped"})
@@ -157,4 +182,22 @@ import User from "../models/user.model.js"
  }
 
 
- export { findMatch, matchClear, matchReqClear }
+
+ //Route for reseting db of user if gets stuck in match or something like that
+
+ const reset = async (req, res) => {
+    const userId = req.userId
+
+    try {
+        await MatchReq.deleteMany({userId})
+        await Match.deleteMany({users: userId})
+        return res.status(200).json({ message: "DB reset successful | You can try again" })
+        
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: "Server Error Mate! | Only admin can save you!" })
+    }
+ }
+
+
+ export { findMatch, matchClear, matchReqClear, reset }
