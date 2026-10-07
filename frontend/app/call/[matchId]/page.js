@@ -1,9 +1,9 @@
+import CallRoom from "@/components/CallRoom";
+
 export default async function CallPage({ params }) {
     const { matchId } = await params
 
-    return (
-        <div className="text-white">
-            {matchId}
-        </div>
-    )
+    
+    return <CallRoom matchId={matchId} />
+    
 }
