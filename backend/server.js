@@ -7,10 +7,22 @@ import userRoutes from "./routes/user.route.js"
 import cookieParser from "cookie-parser"
 import languageRoutes from "./routes/language.route.js"
 import matchRoutes from "./routes/match.route.js"
+import { createServer } from "http"
+import { Server } from "socket.io"
+import callSocket from "./socket/call.socket.js"
 
 dotenv.config()
 
 const app = express()
+const httpServer = createServer(app)
+
+const io = new Server(httpServer, {
+    cors: {
+        origin: "http://localhost:3000",
+        credentials: true
+    }
+})
+callSocket(io)
 
 connectDB()
 
@@ -32,6 +44,6 @@ app.get("/", (req, res) => {
     res.send("Hello from the backend!")
 })
 
-app.listen(PORT, ()=> {
-    console.log(`Server is ready on port ${PORT}`)
+httpServer.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
 })
