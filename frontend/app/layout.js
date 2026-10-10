@@ -18,6 +18,8 @@ export const metadata = {
   description: "Find your coding mate now",
 };
 
+
+
 export default function RootLayout({ children }) {
   return (
     <html

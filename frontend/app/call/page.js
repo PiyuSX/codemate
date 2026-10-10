@@ -42,13 +42,11 @@ export default function Call() {
 
      
     } catch (error) {
-       if(!error.success) {
-        await api("/match/reset", {
-        method: "DELETE"})
        
-        showSlide("Cancel Cancelled")
+        showSlide("Error finding mate | Please reset the DB from Dashboard and try again")
+        router.push("/dashboard")
 
-      }
+      
     }
   };
 
