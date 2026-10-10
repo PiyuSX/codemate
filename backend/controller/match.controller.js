@@ -29,7 +29,9 @@ import User from "../models/user.model.js"
         const userMatchReqStatus = await MatchReq.findOne({userId})
 
         if(userMatchReqStatus  && userMatchReqStatus.status == "matched") {
-            return res.status(400).json({ message: "You are already in a match" })
+            await MatchReq.deleteMany({userId})
+            await Match.deleteMany({users: userId})
+            return findMatch(req, res)
         }
 
         //Checking if User had match and they ended session so their old MatchReq is still in db so using it again
@@ -107,6 +109,15 @@ import User from "../models/user.model.js"
         
            const oneRandomCommonLanguage = commonLanguages[Math.floor(Math.random() * commonLanguages.length)]
 
+           //Fixes dublicate match issue 
+           const claimedMate = await MatchReq.findOneAndUpdate(
+            {userId: matchedUser.userId, status: "searching"},
+            {$set: {status: "matched"}},
+            {new: true}
+           )
+
+           if(!claimedMate) continue
+
            //Creating a Match for both users
            const newMatch = new Match({
                  users: [userId, matchedUser.userId],
@@ -172,9 +183,10 @@ import User from "../models/user.model.js"
             await MatchReq.updateOne({userId: anotherUserId}, {status: "searching"})
             
             await Match.deleteMany({users: userId})
+
         }
 
-        return res.status(200).json({message: "Searching stopped"})
+        return res.status(200).json({success: true, message: "Searching stopped"})
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" })

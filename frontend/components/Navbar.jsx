@@ -11,6 +11,7 @@ import Link from "next/link";
 import { showSlide } from "@/store/useSlideStorage"
 
 
+
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user, setUser } = useUserStorage();
@@ -28,6 +29,10 @@ const Navbar = () => {
     router.push("/");
 
   };
+
+  if (pathname === "/call" || pathname.startsWith("/call/")) {
+    return <></>
+  }
 
   return (
     <div className="z-50 absolute top-0 left-0 w-full bg-transparent">

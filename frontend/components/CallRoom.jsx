@@ -1,144 +1,250 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import socket from "@/lib/socket";
+import {
+  PhoneForwarded,
+  Mic,
+  MicOff,
+  PhoneOff,
+  Video,
+  VideoOff,
+} from "lucide-react";
+import api from "@/lib/api";
+import { showSlide } from "@/store/useSlideStorage";
+import { useRouter } from "next/navigation";
+import useMateStorage from "@/store/useMateStorage";
+import useUserStorage from "@/store/useUserStorage";
+import FileExplorer from "./FileExplorer";
+
+const CallRoom = ({ matchId }) => {
+  const { mate, setMate } = useMateStorage();
+  const { user } = useUserStorage();
+
+  const router = useRouter();
+
+  const handleNextCall = () => {
+    socket.emit("call:end", matchId, mate?.username);
+
+    const res = api("/match/session-end", {
+        method: "DELETE",
+    })
+
+    showSlide("Finding a new mate")
+
+    router.push("/call")
+  };
+
+  const handleEndCall = async () => {
+    socket.emit("call:end", matchId, mate?.username);
+
+    const res = await api("/match/end-all", {
+      method: "DELETE",
+    });
+
+    showSlide(res.message);
+    router.push("/dashboard");
+  };
 
 
-const CallRoom = ({matchId}) => {
+ useEffect(() => {
+    const handleCallEnd = ({ matchId: endedMatchId, message }) => {
 
-    const peer = useRef(null)
-    const localStream = useRef(null)
-    const localVideo = useRef(null)
-    const remoteVideo = useRef(null)
+        if (String(endedMatchId) !== String(matchId)) return;
 
-    useEffect(() => {
+        showSlide(message);
+        router.replace("/call");
+    };
 
-        const startCall = async () => {
-            peer.current = new RTCPeerConnection()
+    socket.on("call:end", handleCallEnd);
 
-            localStream.current = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
-            })
+    return () => {
+        socket.off("call:end", handleCallEnd);
+    };
+}, [matchId, router]);
 
-            localVideo.current.srcObject = localStream.current
 
-            localStream.current.getTracks().forEach((track) => {
-                peer.current.addTrack(track, localStream.current)
-            })
+  const peer = useRef(null);
+  const localStream = useRef(null);
+  const localVideo = useRef(null);
+  const remoteVideo = useRef(null);
+  const isMicOn = useRef(true);
+  const isVideoOn = useRef(true);
 
-            peer.current.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit("ice-candidate", {
-                        matchId,
-                        candidate: event.candidate
-                    })
-                }
-            }
+  const [micStatus, setMicStatus] = useState(true);
+  const [videoStatus, setVideoStatus] = useState(true);
 
-            peer.current.ontrack = (event) => {
-                console.log("Mate stream received")
+  const toggleMic = () => {
+    const newState = !isMicOn.current;
 
-                remoteVideo.current.srcObject = event.streams[0]
-            }
+    isMicOn.current = newState;
+    setMicStatus(newState);
 
-            socket.on("mateJoined", async () => {
-                console.log("Mate has joined the call")
+    localStream.current?.getAudioTracks().forEach((track) => {
+      track.enabled = newState;
+    });
+  };
 
-                if(peer.current.signalingState !== "stable") {
-                    return
-                }
+  const toggleVideo = () => {
+    const newState = !isVideoOn.current;
 
-                const offer = await peer.current.createOffer()
-                await peer.current.setLocalDescription(offer)
+    isVideoOn.current = newState;
+    setVideoStatus(newState);
 
-                socket.emit("offer", {
-                    matchId,
-                    offer
-                })
-            })
+    localStream.current?.getVideoTracks().forEach((track) => {
+      track.enabled = newState;
+    });
+  };
 
-            socket.on("offer", async (offer) => {
-                console.log("Received offer from mate")
+  useEffect(() => {
+    const startCall = async () => {
+      peer.current = new RTCPeerConnection();
 
-                if(peer.current.signalingState !== "stable") {
-                    return
-                }
+      localStream.current = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
 
-                await peer.current.setRemoteDescription(offer)
+      localVideo.current.srcObject = localStream.current;
 
-                if(peer.current.signalingState !== "have-remote-offer") {
-                    return
-                }
+      localStream.current.getTracks().forEach((track) => {
+        peer.current.addTrack(track, localStream.current);
+      });
 
-                const answer = await peer.current.createAnswer()
-                await peer.current.setLocalDescription(answer)
+      peer.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit("ice-candidate", {
+            matchId,
+            candidate: event.candidate,
+          });
+        }
+      };
 
-                socket.emit("answer", {
-                    matchId,
-                    answer
-                })
-            })
+      peer.current.ontrack = (event) => {
+        console.log("Mate stream received");
 
-            socket.on("answer", async (answer) => {
-                console.log("Answer received from mate")
+        remoteVideo.current.srcObject = event.streams[0];
+      };
 
-                if(peer.current.signalingState !== "have-local-offer") {
-                    return
-                }
+      socket.on("mateJoined", async () => {
+        console.log("Mate has joined the call");
 
-                await peer.current.setRemoteDescription(answer)
-            })
-
-            socket.on("ice-candidate", async (candidate) => {
-                console.log("ICE candidate received from mate")
-
-                await peer.current.addIceCandidate(candidate)
-            })
-
-            socket.connect()
-
-            socket.emit("joinRoom", matchId)
+        if (peer.current.signalingState !== "stable") {
+          return;
         }
 
-        startCall()
+        const offer = await peer.current.createOffer();
+        await peer.current.setLocalDescription(offer);
 
-        return () => {
-            socket.emit("leave-call", matchId)
+        socket.emit("offer", {
+          matchId,
+          offer,
+        });
+      });
 
-            socket.off("mateJoined")
-            socket.off("offer")
-            socket.off("answer")
-            socket.off("ice-candidate")
+      socket.on("offer", async (offer) => {
+        console.log("Received offer from mate");
 
-            localStream.current?.getTracks().forEach((track) => {
-                track.stop()
-            })
-
-            socket.disconnect()
-            peer.current?.close()
+        if (peer.current.signalingState !== "stable") {
+          return;
         }
 
-    }, [matchId])
+        await peer.current.setRemoteDescription(offer);
 
-    return (
-        <div>
-            <h1>Call Room</h1>
-            <p>Room: {matchId}</p>
+        if (peer.current.signalingState !== "have-remote-offer") {
+          return;
+        }
 
-            <video
-                ref={localVideo}
-                autoPlay
-                muted
-                playsInline
-            />
-            <video
-                ref={remoteVideo}
-                autoPlay
-                playsInline
-            />
+        const answer = await peer.current.createAnswer();
+        await peer.current.setLocalDescription(answer);
+
+        socket.emit("answer", {
+          matchId,
+          answer,
+        });
+      });
+
+      socket.on("answer", async (answer) => {
+        console.log("Answer received from mate");
+
+        if (peer.current.signalingState !== "have-local-offer") {
+          return;
+        }
+
+        await peer.current.setRemoteDescription(answer);
+      });
+
+      socket.on("ice-candidate", async (candidate) => {
+        console.log("ICE candidate received from mate");
+
+        await peer.current.addIceCandidate(candidate);
+      });
+
+      socket.connect();
+
+      socket.emit("joinRoom", matchId);
+    };
+
+    startCall();
+
+    return () => {
+      socket.emit("leave-call", matchId);
+
+      socket.off("mateJoined");
+      socket.off("offer");
+      socket.off("answer");
+      socket.off("ice-candidate");
+
+      localStream.current?.getTracks().forEach((track) => {
+        track.stop();
+      });
+
+      socket.disconnect();
+      peer.current?.close();
+    };
+  }, [matchId]);
+
+  return (
+    <div className="m-4 flex flex-col justify-between">
+      <div>
+        <FileExplorer />
+      </div>
+      <div className="flex gap-4 flex-col mb-2">
+        <p>{user.username}</p>
+        <video ref={localVideo} autoPlay muted playsInline />
+        <p>{mate?.username}</p>
+        <video ref={remoteVideo} autoPlay playsInline />
+        <div className="flex justify-around bg-slate-900 p-2 rounded-lg items-center">
+          {videoStatus ? (
+            <div className="hover:bg-slate-950 p-4 rounded-lg">
+              {" "}
+              <Video onClick={toggleVideo} />
+            </div>
+          ) : (
+            <div className="hover:bg-slate-950 p-4 rounded-lg">
+              <VideoOff onClick={toggleVideo} />{" "}
+            </div>
+          )}
+          {micStatus ? (
+            <div className="hover:bg-slate-950 p-4 rounded-lg">
+              {" "}
+              <Mic onClick={toggleMic} />
+            </div>
+          ) : (
+            <div className="hover:bg-slate-950 p-4 rounded-lg">
+              <MicOff onClick={toggleMic} />
+            </div>
+          )}
+          <div className="hover:bg-slate-950 p-4 rounded-lg">
+            <PhoneOff onClick={handleEndCall} />
+          </div>
+          <div className="hover:bg-slate-950 p-4 rounded-lg">
+            <PhoneForwarded onClick={handleNextCall} />
+          </div>
         </div>
-    )
-}
+      </div>
+    </div>
+  );
+};
 
-export default CallRoom
+export default CallRoom;

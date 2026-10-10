@@ -30,6 +30,13 @@ const callSocket = (io) => {
         socket.on("ice-candidate", ({matchId, candidate}) => {
             socket.to(matchId).emit("ice-candidate", candidate)
         })
+
+        socket.on("call:end", (matchId, mateUsername) => {
+            socket.to(matchId).emit("call:end", {
+                matchId,
+                message: `Match ended by ${mateUsername}`
+            })
+        })
     })
 }
 
