@@ -31,7 +31,7 @@ const CallRoom = ({ matchId }) => {
     })
 
     showSlide("Finding a new mate")
-
+    setMate(null);
     router.push("/call")
   };
 
@@ -43,6 +43,7 @@ const CallRoom = ({ matchId }) => {
     });
 
     showSlide(res.message);
+    setMate(null);
     router.push("/dashboard");
   };
 
@@ -203,6 +204,8 @@ const CallRoom = ({ matchId }) => {
       peer.current?.close();
     };
   }, [matchId]);
+
+
 
   return (
     <div className="m-4 flex flex-col justify-between">
