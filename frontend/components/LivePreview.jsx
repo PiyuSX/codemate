@@ -2,12 +2,12 @@
 
 import { useMemo } from "react";
 import useEditorStorage from "@/store/useEditorStorage";
-import useMateStorage from "@/store/useMateStorage";
+import useMateCodeStorage from "@/store/useMateCodeStorage";
 
 const LivePreview = ({ running, mode = "own" }) => {
 
     const ownFiles = useEditorStorage((state) => state.files);
-    const mateFiles = useMateStorage((state) => state.files)
+    const mateFiles = useMateCodeStorage((state) => state.files)
 
 
     const files = mode == "mate" ? mateFiles : ownFiles;

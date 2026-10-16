@@ -2,24 +2,23 @@
 
 import Editor from "@monaco-editor/react";
 import useEditorStorage from "@/store/useEditorStorage";
-import useMateStorage from "@/store/useMateStorage";
+import useMateCodeStorage from "@/store/useMateCodeStorage";
 
 export default function CodeEditor({ mode = "own"}) {
-  const ownFiles = useEditorStorage((state) => state.files);
-  const ownSelectedFile = useEditorStorage((state) => state.selectedFile);
-  const updateFileContent = useEditorStorage(
+  const ownFiles = useEditorStorage((state) => state.files ?? []);
+const ownSelectedFile = useEditorStorage((state) => state.selectedFile);
+
+const updateFileContent = useEditorStorage(
     (state) => state.updateFileContent,
-  );
+);
 
-  const mateFiles = useMateStorage((state) => state.files)
-  const mateSelectedFile = useMateStorage((state) => state.selectedFile)
+const mateFiles = useMateCodeStorage((state) => state.files ?? []);
+const mateSelectedFile = useMateCodeStorage((state) => state.selectedFile);
 
-  const files = mode === "mate" ? mateFiles : ownFiles;
-  const selectedFile = mode === "mate" ? mateSelectedFile : ownSelectedFile
+const files = mode === "mate" ? mateFiles : ownFiles;
+const selectedFile = mode === "mate" ? mateSelectedFile : ownSelectedFile;
 
-
-
-  const activeFile = files.find((file) => file.name === selectedFile);
+const activeFile = files.find((file) => file.name === selectedFile);
 
   if (!activeFile) {
     return (
