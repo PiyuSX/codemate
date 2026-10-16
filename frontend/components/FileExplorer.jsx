@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { fileIcons } from "@/lib/fileIcon";
 import useEditorStorage from "@/store/useEditorStorage";
 
-const FileExplorer = () => {
+const FileExplorer = ({onModeChange}) => {
   const {
     files,
     selectedFile,
@@ -127,6 +127,7 @@ const FileExplorer = () => {
             onClick={() => {
               if (renamingFile !== file.name) {
                 setSelectedFile(file.name);
+                onModeChange?.("own")
               }
             }}
             onContextMenu={(e) => openContextMenu(e, file.name)}
