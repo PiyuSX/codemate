@@ -2,9 +2,15 @@
 
 import { useMemo } from "react";
 import useEditorStorage from "@/store/useEditorStorage";
+import useMateStorage from "@/store/useMateStorage";
 
-const LivePreview = ({ running }) => {
-    const files = useEditorStorage((state) => state.files);
+const LivePreview = ({ running, mode = "own" }) => {
+
+    const ownFiles = useEditorStorage((state) => state.files);
+    const mateFiles = useMateStorage((state) => state.files)
+
+
+    const files = mode == "mate" ? mateFiles : ownFiles;
 
     const srcDoc = useMemo(() => {
         const htmlFile = files.find(

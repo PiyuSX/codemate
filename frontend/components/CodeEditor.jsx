@@ -2,13 +2,22 @@
 
 import Editor from "@monaco-editor/react";
 import useEditorStorage from "@/store/useEditorStorage";
+import useMateStorage from "@/store/useMateStorage";
 
-export default function CodeEditor() {
-  const files = useEditorStorage((state) => state.files);
-  const selectedFile = useEditorStorage((state) => state.selectedFile);
+export default function CodeEditor({ mode = "own"}) {
+  const ownFiles = useEditorStorage((state) => state.files);
+  const ownSelectedFile = useEditorStorage((state) => state.selectedFile);
   const updateFileContent = useEditorStorage(
     (state) => state.updateFileContent,
   );
+
+  const mateFiles = useMateStorage((state) => state.files)
+  const mateSelectedFile = useMateStorage((state) => state.selectedFile)
+
+  const files = mode === "mate" ? mateFiles : ownFiles;
+  const selectedFile = mode === "mate" ? mateSelectedFile : ownSelectedFile
+
+
 
   const activeFile = files.find((file) => file.name === selectedFile);
 
@@ -30,13 +39,14 @@ export default function CodeEditor() {
   return (
     <Editor
       className="border border-gray-700"
-      key={activeFile.name}
+      key={`${mode}-${activeFile.name}`}
       height="100%"
       theme="vs-dark"
       language={languageMap[activeFile.type] || "plaintext"}
       value={activeFile.content ?? ""}
-      onChange={(value) => updateFileContent(activeFile.name, value ?? "")}
+      onChange={mode === "own" ? (value) => updateFileContent(activeFile.name, value ?? "") : undefined}
       options={{
+        readOnly: mode === "mate",
         fontSize: 18,
         lineHeight: 22,
         minimap: { enabled: false },

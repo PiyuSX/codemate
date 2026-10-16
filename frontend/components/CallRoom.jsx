@@ -16,8 +16,9 @@ import { useRouter } from "next/navigation";
 import useMateStorage from "@/store/useMateStorage";
 import useUserStorage from "@/store/useUserStorage";
 import FileExplorer from "./FileExplorer";
+import MateFileExplorer from "./MateFileExplorer";
 
-const CallRoom = ({ matchId }) => {
+const CallRoom = ({ matchId, onModeChange }) => {
 
   
   const { mate, setMate } = useMateStorage();
@@ -190,7 +191,9 @@ const CallRoom = ({ matchId }) => {
   return (
     <div className="m-4 flex flex-col justify-between ">
       <div>
-        <FileExplorer />
+        <FileExplorer onModeChange={onModeChange} />
+        <MateFileExplorer onModeChange={onModeChange} />
+
       </div>
       <div className="flex gap-4 flex-col mb-2">
         <p>{user.username}</p>
@@ -224,10 +227,10 @@ const CallRoom = ({ matchId }) => {
 
           <button
             type="button"
-            onClick={handleEndCall}
+            onClick={handleNextCall}
             className="hover:bg-slate-950 p-4 rounded-lg"
           >
-            <PhoneOff />
+            <PhoneForwarded />
           </button>
         </div>
       </div>
