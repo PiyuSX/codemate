@@ -32,7 +32,7 @@ export default function Page() {
       </div>
           )}
 
-          <img src="/placeholder.png" alt="heropicture" className="mt-20 rounded-2xl" width="1200" height="300" />
+          <img src="/home.png" alt="heropicture" className="mt-20 rounded-2xl" width="1200" height="300" />
       </div>
     </div>
   );
