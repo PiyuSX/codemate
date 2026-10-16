@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image";
 import useUserStorage from "@/store/useUserStorage";
 import Button from "@/components/Button";
 // import { showSlide } from "@/store/useSlideStorage"
@@ -33,7 +32,7 @@ export default function Page() {
       </div>
           )}
 
-          <Image src="/placeholder.png" alt="heropicture" className="mt-20 rounded-2xl" width="1200" height="300" />
+          <img src="/placeholder.png" alt="heropicture" className="mt-20 rounded-2xl" width="1200" height="300" />
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ import useMateStorage from "@/store/useMateStorage";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
+import useEditorStorage from "@/store/useEditorStorage";
+
 
 export default function Call() {
 
@@ -31,13 +33,16 @@ export default function Call() {
       showSlide(res.message);
       setMate(res.mateDetails);
       setMatchId(res.matchId);
-      console.log(res.mateDetails);
+      
       if (res.mateDetails) {
+        useEditorStorage.getState().setReadme();
         setCallStatus("Mate Found | Connecting");
       }
 
       if(res.matchId) {
+
         router.push(`/call/${res.matchId}`)
+        
       }
 
 
@@ -84,8 +89,8 @@ export default function Call() {
   return (
     <div className="flex flex-row items-center justify-around h-screen">
       <div className="flex flex-col items-center">
-        <img src={user.imgURL} alt="User Image" className="h-64 rounded-full" />
-        <p className="text-lg font-medium mt-3">{user.username}</p>
+        <img src={user?.imgURL} alt="User Image" className="h-64 rounded-full" />
+        <p className="text-lg font-medium mt-3">{user?.username}</p>
       </div>
       <div className="text-3xl font-semibold">
         <div>

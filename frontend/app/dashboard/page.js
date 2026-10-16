@@ -64,7 +64,7 @@ export default function page() {
 
       <h2 className="text-xl mb-6">Choose Your Languages to continue with</h2>
 
-      {user.languages.length == 0 ? (
+      {(user?.languages ?? []).length === 0 ? (
         <>
           <p>No Languages In your Profile</p>
 
