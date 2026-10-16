@@ -2,6 +2,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Slide from "@/components/Slide";
+import ClearSavedFiles from "@/components/ClearSavedFiles";
+import StoreHydration from "@/components/StoreHydration";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,8 +31,13 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
         <Navbar />
         <Slide />
+        <ClearSavedFiles />
+        <StoreHydration >
         {children}
+        </StoreHydration>
       </body>
     </html>
   );
 }
+
+
