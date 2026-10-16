@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 
 export default function Call() {
+
   const { languages, setMatchId } = useMatchStorage();
   const { user } = useUserStorage();
   const { mate, setMate } = useMateStorage();
@@ -69,6 +70,7 @@ export default function Call() {
       const res = await api("/match/end-all", {
         method: "DELETE"
       })
+
 
       showSlide(res.message)
       router.push("/dashboard")

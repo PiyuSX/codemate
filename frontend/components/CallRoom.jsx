@@ -18,6 +18,8 @@ import useUserStorage from "@/store/useUserStorage";
 import FileExplorer from "./FileExplorer";
 
 const CallRoom = ({ matchId }) => {
+
+  
   const { mate, setMate } = useMateStorage();
   const { user } = useUserStorage();
 
@@ -27,15 +29,16 @@ const CallRoom = ({ matchId }) => {
     socket.emit("call:end", matchId, mate?.username);
 
     const res = api("/match/session-end", {
-        method: "DELETE",
-    })
+      method: "DELETE",
+    });
 
-    showSlide("Finding a new mate")
-    setMate(null);
-    router.push("/call")
+    showSlide("Finding a new mate");
+    router.push("/call");
   };
 
   const handleEndCall = async () => {
+    console.log("END CALL CLICKED");
+
     socket.emit("call:end", matchId, mate?.username);
 
     const res = await api("/match/end-all", {
@@ -47,23 +50,20 @@ const CallRoom = ({ matchId }) => {
     router.push("/dashboard");
   };
 
-
- useEffect(() => {
+  useEffect(() => {
     const handleCallEnd = ({ matchId: endedMatchId, message }) => {
+      if (String(endedMatchId) !== String(matchId)) return;
 
-        if (String(endedMatchId) !== String(matchId)) return;
-
-        showSlide(message);
-        router.replace("/call");
+      showSlide(message);
+      router.replace("/call");
     };
 
     socket.on("call:end", handleCallEnd);
 
     return () => {
-        socket.off("call:end", handleCallEnd);
+      socket.off("call:end", handleCallEnd);
     };
-}, [matchId, router]);
-
+  }, [matchId, router]);
 
   const peer = useRef(null);
   const localStream = useRef(null);
@@ -101,16 +101,23 @@ const CallRoom = ({ matchId }) => {
     const startCall = async () => {
       peer.current = new RTCPeerConnection();
 
-      localStream.current = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
+      try {
+        localStream.current = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
 
-      localVideo.current.srcObject = localStream.current;
+        if (localVideo.current) {
+          localVideo.current.srcObject = localStream.current;
+        }
 
-      localStream.current.getTracks().forEach((track) => {
-        peer.current.addTrack(track, localStream.current);
-      });
+        localStream.current.getTracks().forEach((track) => {
+          peer.current.addTrack(track, localStream.current);
+        });
+      } catch (error) {
+        console.error("Camera/microphone access failed:", error);
+        showSlide("Allow camera and microphone access to use video calls");
+      }
 
       peer.current.onicecandidate = (event) => {
         if (event.candidate) {
@@ -122,71 +129,48 @@ const CallRoom = ({ matchId }) => {
       };
 
       peer.current.ontrack = (event) => {
-        console.log("Mate stream received");
-
-        remoteVideo.current.srcObject = event.streams[0];
+        if (remoteVideo.current) {
+          remoteVideo.current.srcObject = event.streams[0];
+        }
       };
 
       socket.on("mateJoined", async () => {
-        console.log("Mate has joined the call");
-
-        if (peer.current.signalingState !== "stable") {
-          return;
-        }
+        if (peer.current.signalingState !== "stable") return;
 
         const offer = await peer.current.createOffer();
         await peer.current.setLocalDescription(offer);
-
-        socket.emit("offer", {
-          matchId,
-          offer,
-        });
+        socket.emit("offer", { matchId, offer });
       });
 
       socket.on("offer", async (offer) => {
-        console.log("Received offer from mate");
-
-        if (peer.current.signalingState !== "stable") {
-          return;
-        }
+        if (peer.current.signalingState !== "stable") return;
 
         await peer.current.setRemoteDescription(offer);
-
-        if (peer.current.signalingState !== "have-remote-offer") {
-          return;
-        }
-
         const answer = await peer.current.createAnswer();
         await peer.current.setLocalDescription(answer);
-
-        socket.emit("answer", {
-          matchId,
-          answer,
-        });
+        socket.emit("answer", { matchId, answer });
       });
 
       socket.on("answer", async (answer) => {
-        console.log("Answer received from mate");
-
-        if (peer.current.signalingState !== "have-local-offer") {
-          return;
-        }
-
+        if (peer.current.signalingState !== "have-local-offer") return;
         await peer.current.setRemoteDescription(answer);
       });
 
       socket.on("ice-candidate", async (candidate) => {
-        console.log("ICE candidate received from mate");
-
-        await peer.current.addIceCandidate(candidate);
+        try {
+          await peer.current.addIceCandidate(candidate);
+        } catch (error) {
+          console.error("Failed to add ICE candidate:", error);
+        }
       });
 
       socket.connect();
-
       socket.emit("joinRoom", matchId);
     };
 
-    startCall();
+    startCall().catch((error) => {
+      console.error("Call setup failed:", error);
+    });
 
     return () => {
       socket.emit("leave-call", matchId);
@@ -196,19 +180,15 @@ const CallRoom = ({ matchId }) => {
       socket.off("answer");
       socket.off("ice-candidate");
 
-      localStream.current?.getTracks().forEach((track) => {
-        track.stop();
-      });
+      localStream.current?.getTracks().forEach((track) => track.stop());
 
-      socket.disconnect();
       peer.current?.close();
+      socket.disconnect();
     };
   }, [matchId]);
 
-
-
   return (
-    <div className="m-4 flex flex-col justify-between">
+    <div className="m-4 flex flex-col justify-between ">
       <div>
         <FileExplorer />
       </div>
@@ -241,9 +221,14 @@ const CallRoom = ({ matchId }) => {
           <div className="hover:bg-slate-950 p-4 rounded-lg">
             <PhoneOff onClick={handleEndCall} />
           </div>
-          <div className="hover:bg-slate-950 p-4 rounded-lg">
-            <PhoneForwarded onClick={handleNextCall} />
-          </div>
+
+          <button
+            type="button"
+            onClick={handleEndCall}
+            className="hover:bg-slate-950 p-4 rounded-lg"
+          >
+            <PhoneOff />
+          </button>
         </div>
       </div>
     </div>

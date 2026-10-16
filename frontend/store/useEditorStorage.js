@@ -2,61 +2,73 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 const useEditorStorage = create(
-    persist(
-        (set) => ({
-            files: [],
-            selectedFile: null,
+  persist(
+    (set) => ({
+      files: [],
+      selectedFile: null,
 
-            setSelectedFile: (name) => set({selectedFile: name}),
+      setSelectedFile: (name) => set({ selectedFile: name }),
 
-            createFile: (name) => set({ selectedFile: name}),
+      createFile: (file) =>
+        set((state) => ({
+          files: [...state.files, file],
+          selectedFile: file.name,
+        })),
 
-            createFile: (file) => 
-                set((state) => ({
-                    files: [...state.files, file],
-                    selectedFile: file.name,
-                })),
-
-            updateFileContent: (name, content) => 
-                set((state) => ({
-                    files: state.files.map((file) =>
-                    file.name === name ? {...file, content} : file
-                    )
-                })),
-            deleteFile: (name) => 
-                set((state) => {
-                    const files = state.files.filter((file) => file.name !== name);
-
-                    return {
-                        files,
-                        selectedFile: state.selectedFile === name ? files[0]?.name || null : state.selectedFile,
-                    };
-                }),
-
-            renameFile: (oldName, newName) => 
-                set((state) => {
-                    const name = newName.trim()
-
-                    if(!name || state.files.some((file) => file.name === name)) {
-                        return state;
-                    }
-
-                    return {
-                        files: state.files.map((file) => 
-                           file.name === oldName ? {...file, name} : file),
-
-                        selectedFile:
-                        state.selectedFile === oldName ? name: state.selectedFile,
-                    }
-                })
-
-           
-
+      clearFiles: () =>
+        set({
+          files: [],
+          selectedFile: null,
         }),
-        {
-            name: "codemate-editor"
-        }
-    )
-)
+      updateFileContent: (name, content) =>
+        set((state) => ({
+          files: state.files.map((file) =>
+            file.name === name ? { ...file, content } : file,
+          ),
+        })),
+      deleteFile: (name) =>
+        set((state) => {
+          const files = state.files.filter((file) => file.name !== name);
 
-export default useEditorStorage
+          return {
+            files,
+            selectedFile:
+              state.selectedFile === name
+                ? files[0]?.name || null
+                : state.selectedFile,
+          };
+        }),
+
+      renameFile: (oldName, newName) =>
+        set((state) => {
+          const name = newName.trim();
+
+          if (!name || state.files.some((file) => file.name === name)) {
+            return state;
+          }
+
+          return {
+            files: state.files.map((file) =>
+              file.name === oldName
+                ? {
+                    ...file,
+                    name,
+                    type: name.includes(".")
+                      ? name.split(".").pop().toLowerCase()
+                      : "",
+                  }
+                : file,
+            ),
+
+            selectedFile:
+              state.selectedFile === oldName ? name : state.selectedFile,
+          };
+        }),
+    }),
+    {
+      name: "codemate-editor",
+    },
+  ),
+);
+
+export default useEditorStorage;
