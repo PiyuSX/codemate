@@ -7,14 +7,14 @@ import CodeEditor from "@/components/CodeEditor";
 import LivePreview from "@/components/LivePreview";
 import socket from "@/lib/socket";
 import useEditorStorage from "@/store/useEditorStorage";
-import useMateStorage from "@/store/useMateStorage";
 import { showSlide } from "@/store/useSlideStorage";
+import useMateCodeStorage from "@/store/useMateCodeStorage";
 
 const CodeWorkPlace = ({ matchId, codeMode = "own" }) => {
   const [submitted, setSubmitted] = useState(false);
 
   const files = useEditorStorage((state) => state.files);
-  const setMateFiles = useMateStorage((state) => state.setFiles);
+  const setMateFiles = useMateCodeStorage((state) => state.setFiles);
 
   const [running, setRunning] = useState(false);
   const [view, setView] = useState("editor");
@@ -32,8 +32,13 @@ const CodeWorkPlace = ({ matchId, codeMode = "own" }) => {
   useEffect(() => {
     const handleWaiting = () => {
       showSlide("Waiting for your mate to submit...");
-    };
 
+    };
+    
+    const handleSubmissionError = ( {message } ) => {
+        setSubmitted(false)
+        showSlide(message)
+    }
     const handleReady = ({ matchId: receivedMatchId, mateFiles }) => {
       if (String(receivedMatchId) !== String(matchId)) return;
 
@@ -43,10 +48,12 @@ const CodeWorkPlace = ({ matchId, codeMode = "own" }) => {
 
     socket.on("submission:waiting", handleWaiting);
     socket.on("submission:ready", handleReady);
+    socket.on("submission:error", handleSubmissionError)
 
     return () => {
       socket.off("submission:waiting", handleWaiting);
       socket.off("submission:ready", handleReady);
+      socket.off("submission:error", handleSubmissionError);
     };
   }, [matchId, setMateFiles]);
 

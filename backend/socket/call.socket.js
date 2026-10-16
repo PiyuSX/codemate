@@ -1,138 +1,136 @@
-
 const callSocket = (io) => {
+  const submissions = new Map();
+  const completedMatches = new Set();
+  io.on("connection", (socket) => {
+    socket.on("joinRoom", (matchId) => {
+      const room = io.sockets.adapter.rooms.get(matchId);
 
-    const submissions = new Map()
-    const completedMatches = new Map()
-    io.on("connection", (socket) => {
+      if (room?.has(socket.id)) {
+        return;
+      }
 
-        socket.on("joinRoom", (matchId) => {
-            const room = io.sockets.adapter.rooms.get(matchId)
+      if (room && room.size > 0) {
+        socket.to(matchId).emit("mateJoined");
+      }
+      socket.join(matchId);
 
-            if(room?.has(socket.id)) {
-                return 
-            }
+      console.log(`${socket.id} -> Joined room ${matchId}`);
+    });
 
-            if(room && room.size > 0) {
-                socket.to(matchId).emit("mateJoined")
-            }
-            socket.join(matchId)
+    socket.on("offer", ({ matchId, offer }) => {
+      socket.to(matchId).emit("offer", offer);
+    });
 
-            console.log(`${socket.id} -> Joined room ${matchId}`)
-        })
+    socket.on("answer", ({ matchId, answer }) => {
+      socket.to(matchId).emit("answer", answer);
+    });
 
-        socket.on("offer", ({ matchId, offer}) => {
-            socket.to(matchId).emit("offer", offer)
-        })
+    socket.on("ice-candidate", ({ matchId, candidate }) => {
+      socket.to(matchId).emit("ice-candidate", candidate);
+    });
 
-        socket.on("answer", ({matchId, answer}) => {
-            socket.to(matchId).emit("answer", answer)
-        })
+    socket.on("call:end", (matchId, mateUsername) => {
+      socket.to(matchId).emit("call:end", {
+        matchId,
+        message: `Match ended by ${mateUsername}`,
+      });
 
-        socket.on("ice-candidate", ({matchId, candidate}) => {
-            socket.to(matchId).emit("ice-candidate", candidate)
-        })
+      submissions.delete(matchId);
+      completedMatches.delete(matchId);
+    });
 
-        socket.on("call:end", (matchId, mateUsername) => {
-            socket.to(matchId).emit("call:end", {
-                matchId,
-                message: `Match ended by ${mateUsername}`
-            })
+    socket.on("submission:submit", ({ matchId, files }) => {
+      const room = io.sockets.adapter.rooms.get(matchId);
 
-            submissions.delete(matchId)
-            completedMatches.delete(matchId)
-        })
+      if (!room?.has(socket.id) || room.size !== 2) {
+        socket.emit("submission:error", {
+          message: "Mate is not connected.",
+        });
+        return;
+      }
 
-        socket.on("submission:submit", ({matchId, files}) => {
-            const room = io.sockets.adapter.rooms.get(matchId)
+      if (completedMatches.has(matchId)) {
+        socket.emit("submission:error", {
+          message: "Both users have already submitted",
+        });
+        return;
+      }
 
-            if (!room?.has(socket.id) || room.size !== 2) {
-                socket.emit("submission:error", {
-                    message: "Mate is not connected."
-                })
-                return
-            }
+      if (
+        !Array.isArray(files) ||
+        files.length > 50 ||
+        files.some(
+          (file) =>
+            !file ||
+            typeof file.name !== "string" ||
+            typeof file.content !== "string" ||
+            typeof file.type !== "string",
+        )
+      ) {
+        socket.emit("submission:error", {
+          message: "Invalid files",
+        });
 
-            if (completedMatches.has(matchId)) {
-                socket.emit("submission:error", {
-                    message: "Both users have already submitted"
-                })
-                return
-            }
+        return;
+      }
 
-            if  (
-                !Array.isArray(files) ||
-                files.length > 50 ||
-                files.some(file =>
-                    !file || 
-                    typeof file.name !== "string" ||
-                    typeof file.content !== "string" ||
-                    typeof file.type !== "string"
-                ) ) {
-                    socket.emit("submission:error", {
-                        message: "Invalid files"
-                    })
+      if (!submissions.has(matchId)) {
+        submissions.set(matchId, new Map());
+      }
 
-                    return
-                }
+      const matchSubmissions = submissions.get(matchId);
 
-                if (!submissions.has(matchId)) {
-                    submissions.set(matchId, new Map())
-                }
+      if (matchSubmissions.has(socket.id)) {
+        socket.emit("submission:error", {
+          message: "You have submitted already dude",
+        });
 
-                const matchSubmissions = submissions.get(matchId)
+        return;
+      }
 
-                if (matchSubmissions.has(socket.id)) {
-                    socket.emit("submission:error", {
-                        message: "You have submitted already dude"
-                    })
+      matchSubmissions.set(
+        socket.id,
+        files.map((file) => ({
+          name: file.name,
+          type: file.type,
+          content: file.content,
+        })),
+      );
 
-                    return
-                }
+      socket.emit("submission:waiting");
 
-                matchSubmissions.set(socket.id, files.map(file => ({
-                    name: file.name,
-                    type: file.type,
-                    content: file.content
-                })))
+      if (matchSubmissions.size !== 2) return;
 
-                socket.emit("submission:waiting")
+      const [userA, userB] = [...matchSubmissions.entries()];
 
-                if(matchSubmissions.size !== 2) return
+      completedMatches.add(matchId);
 
-                const [userA, userB] = [...matchSubmissions.entries()]
+      io.to(userA[0]).emit("submission:ready", {
+        matchId,
+        mateFiles: userB[1],
+      });
 
-                completedMatches.add(matchId)
+      io.to(userB[0]).emit("submission:ready", {
+        matchId,
+        mateFiles: userA[1],
+      });
 
-                io.to(userA[0]).emit("submission:ready", {
-                    mateFiles: userB[1]
-                })
+      submissions.delete(matchId);
+    });
 
-                io.to(userB[0]).emit("submission:ready", {
-                    mateFiles: userA[1]
-                })
+    socket.on("disconnecting", () => {
+      for (const roomId of socket.rooms) {
+        if (roomId === socket.id) continue;
 
-                submissions.delete(matchId)
-        })
+        submissions.delete(roomId);
+        completedMatches.delete(roomId);
+      }
+    });
 
-        socket.on("disconnecting", () => {
-            for ( const roomId of socket.rooms) {
-                if (roomId === socket.id) continue
+    socket.on("disconnect", () => {
+      console.log("User disconnected", socket.id);
+    });
+  });
+};
 
-                submissions.delete(roomId)
-                completedMatches.delete(roomId)
-            }
-        })
-
-        socket.on("disconnect", () => {
-            console.log("User disconnected", socket.id)
-        })
-
-      
-        
-    })
-}
-
-export default callSocket
-
-
-
+export default callSocket;
