@@ -2,9 +2,7 @@
 
 
 export const Languages = [
-    "HTML",
-    "CSS",
-    "JavaScript",
-    "Python"
+    "Web-HTML-CSS-JS",
+    "Python(Coming Soon)"
 ]
 
