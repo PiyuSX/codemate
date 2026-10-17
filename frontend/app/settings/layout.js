@@ -2,10 +2,12 @@
 
 import Link from "next/link"
 import Button from "@/components/Button"
+import ProtectedRoute from "@/components/ProtectedRoute"
 
 
 export default function SettingsLayout({children}) {
     return (
+        <ProtectedRoute>
         <div className="grid grid-cols-[15%_85%] ">
             <div className="border border-slate-800 p-4 rounded-lg border-l-0 h-screen flex flex-col justify-between">
                 <div>
@@ -32,5 +34,6 @@ export default function SettingsLayout({children}) {
                 {children}
             </div>
         </div>
+        </ProtectedRoute>
     )
 }

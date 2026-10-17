@@ -9,6 +9,7 @@ import { showSlide } from "@/store/useSlideStorage";
 import { useRouter } from "next/navigation"
 import useMatchStorage from "@/store/useMatchStorage";
 import api from "@/lib/api";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function page() {
 
@@ -57,6 +58,7 @@ export default function page() {
 
 
   return (
+    <ProtectedRoute>
     <div className="flex flex-col items-center py-2 mt-72">
       <h1 className="text-4xl font-semibold mb-16">
         Find You Random Mate Now !
@@ -165,5 +167,6 @@ export default function page() {
       <Button style="!w-60 ml-5" text="Reset DB" onclick={handleReset} primary />
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
