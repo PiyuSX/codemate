@@ -9,6 +9,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import useEditorStorage from "@/store/useEditorStorage";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 
 export default function Call() {
@@ -87,6 +88,7 @@ export default function Call() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="flex flex-row items-center justify-around h-screen">
       <div className="flex flex-col items-center">
         <img src={user?.imgURL} alt="User Image" className="h-64 rounded-full" />
@@ -127,5 +129,6 @@ export default function Call() {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   );
 }
