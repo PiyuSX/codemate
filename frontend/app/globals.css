@@ -8,8 +8,11 @@ body {
   background-color: #020617;
 }
 
+html {
+  font-size: 75%;
+}
+
 body {
-  zoom: 0.8;
   width: 100%;
   min-height: 100vh;
   overflow-x: clip;
