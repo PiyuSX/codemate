@@ -34,11 +34,17 @@ Clone the repository:
 git clone https://github.com/PiyuSX/codemate.git
 cd codemate
 ```
+Open Terminal in CodeEditor then
+For Frontend
+```bash
+cd frontend
+npm run dev
+```
 
-Install dependencies and start the development server. Run these commands in the relevant frontend and backend directories:
+Open Another Terminal in CodeEditor then
 
 ```bash
-npm install
+cd backend
 npm run dev
 ```
 
@@ -49,3 +55,8 @@ I have provided example env for it
 
 Codemate is a work in progress. I'm building it step by step and figuring things out along the way.
 
+
+
+## License
+
+MIT Licence
