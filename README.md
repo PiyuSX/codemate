@@ -26,26 +26,37 @@ I'm still working on it, so some parts may change as the project grows.
 - Zustand
 - WebRTC for video calls
 
-## Running locally
+Running locally
 
 Clone the repository:
 
-```bash
 git clone https://github.com/PiyuSX/codemate.git
 cd codemate
-```
 
-Install dependencies and start the development server. Run these commands in the relevant frontend and backend directories:
+Frontend
 
-```bash
+Go to the frontend folder and install the dependencies:
+
+cd frontend
 npm install
+
+Set up your .env.local file using the example env file, then run:
+
 npm run dev
-```
 
-You'll also need to configure the environment variables for your local setup.
-I have provided example env for it 
+Backend
 
-## Status
+Open another terminal and go to the backend folder:
 
-Codemate is a work in progress. I'm building it step by step and figuring things out along the way.
+cd backend
+npm install
 
+Set up your .env file using the example env file, then run:
+
+npm run dev
+
+Both the frontend and backend need to be running for the app to work properly.
+
+Status
+
+Codemate is still a work in progress. I'm building it step by step and adding things as I go.
