@@ -12,7 +12,6 @@ const CallWorkspace = ( { matchId }) => {
             <CallRoom matchId={matchId} 
             onModeChange={setCodeMode}
             />
-
              <div className="min-h-0">
                 <CodeWorkPlace
                 matchId={matchId}
