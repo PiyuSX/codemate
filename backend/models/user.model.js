@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     },
     languages: {
         type: [String],
-        enum: ["HTML", "CSS", "JavaScript", "Python"],
+        enum: ["Web-HTML-CSS-JS", "Python"],
         default: []
     }
 }, { timestamps: true})
