@@ -16,6 +16,14 @@ Codemate is a developer matching app where you can meet other developers, connec
 
 I'm still working on it, so some parts may change as the project grows.
 
+##How it works
+-Users can create an account setup their dev profile and find other devs to connect with, we call them mates.Once matched they can start a random video call and collab while discussing their common language and start working on a challange or project on the platform.
+
+#Future plans 
+-Improve the dev matching experience 
+-Add more profile customization options
+-Add more language support
+
 ## Built with
 
 - Next.js
