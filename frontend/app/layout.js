@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "CodeMate",
-  description: "Find your coding mate now",
+  description: "Find your coding mate now!",
 };
 
 
