@@ -1,6 +1,6 @@
 # Codemate
 
-![Codemate](https://codemate-umber.vercel.app/home.png)
+![Codemate](frontend/public/home.png)
 
 A place to find someone to code with.
 
